@@ -41,7 +41,7 @@ from homeassistant.util import dt as dt_util, ensure_unique_string, slugify
 from . import device_registry as dr, entity_registry as er
 from .device_registry import DeviceEntryType
 from .event import async_track_entity_registry_updated_event
-from .typing import StateType
+from .typing import UNDEFINED, StateType, UndefinedType
 
 if TYPE_CHECKING:
     from .entity_platform import EntityPlatform
@@ -229,7 +229,7 @@ class EntityDescription:
     force_update: bool = False
     icon: str | None = None
     has_entity_name: bool = False
-    name: str | DeviceClassName | None = None
+    name: str | DeviceClassName | UndefinedType | None = UNDEFINED
     translation_key: str | None = None
     unit_of_measurement: str | None = None
 
@@ -340,6 +340,10 @@ class Entity(ABC):
         )
         return self.platform.component_translations.get(name_translation_key)
 
+    def _default_to_device_class_name(self) -> bool:
+        """Return True if an unnamed entity should be named by its device class."""
+        return False
+
     @property
     def name(self) -> str | None:
         """Return the name of the entity."""
@@ -357,9 +361,19 @@ class Entity(ABC):
                 name: str = self.platform.platform_translations[name_translation_key]
                 return name
         if hasattr(self, "entity_description"):
-            if self.entity_description.name is DEVICE_CLASS_NAME:
+            description_name = self.entity_description.name
+            if description_name is DEVICE_CLASS_NAME or (
+                description_name is UNDEFINED and self._default_to_device_class_name()
+            ):
                 return self._device_class_name()
-            return self.entity_description.name
+            if description_name is not UNDEFINED:
+                return description_name
+            return None
+
+        # The entity has no name set by _attr_name, translation_key or entity_description
+        # Check if the entity should be named by its device class
+        if self._default_to_device_class_name():
+            return self._device_class_name()
         return None
 
     @property
