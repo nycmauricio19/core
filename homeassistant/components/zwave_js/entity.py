@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import DEVICE_CLASS_NAME, DeviceInfo, Entity
+from homeassistant.helpers.typing import UNDEFINED
 
 from .const import DOMAIN, LOGGER
 from .discovery import ZwaveDiscoveryInfo
@@ -136,10 +137,11 @@ class ZWaveBaseEntity(Entity):
             and self.entity_description
             and self.entity_description.name
         ):
-            # It's not possible to do string manipulations on DEVICE_CLASS_NAME
-            # the assert satisfies the type checker and will catch attempts
-            # to use DEVICE_CLASS_NAME in the entity descriptions.
+            # It's not possible to do string manipulations on DEVICE_CLASS_NAME or
+            # UNDEFINED. The asserts satisfy the type checker and will catch attempts
+            # to use DEVICE_CLASS_NAME or UNDEFINED in the entity descriptions.
             assert self.entity_description.name is not DEVICE_CLASS_NAME
+            assert self.entity_description.name is not UNDEFINED
             name = self.entity_description.name
 
         if name_prefix:

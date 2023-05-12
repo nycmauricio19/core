@@ -28,6 +28,7 @@ from homeassistant.helpers.entity import (
     Entity,
     EntityDescription,
 )
+from homeassistant.helpers.typing import UNDEFINED
 
 from .const import (
     ATTR_EVENT_ID,
@@ -204,10 +205,11 @@ class ProtectDeviceEntity(Entity):
             self.entity_description = description
             self._attr_unique_id = f"{self.device.mac}_{description.key}"
             name = description.name or ""
-            # It's not possible to do string manipulations on DEVICE_CLASS_NAME
-            # the assert satisfies the type checker and will catch attempts
-            # to use DEVICE_CLASS_NAME in the entity descriptions.
+            # It's not possible to do string manipulations on DEVICE_CLASS_NAME or
+            # UNDEFINED. The asserts satisfy the type checker and will catch attempts
+            # to use DEVICE_CLASS_NAME or UNDEFINED in the entity descriptions.
             assert name is not DEVICE_CLASS_NAME
+            assert name is not UNDEFINED
             self._attr_name = f"{self.device.display_name} {name.title()}"
 
         self._attr_attribution = DEFAULT_ATTRIBUTION

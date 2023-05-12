@@ -30,6 +30,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DEVICE_CLASS_NAME, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import UNDEFINED
 
 from .const import DOMAIN
 
@@ -107,10 +108,11 @@ def sensor_update_to_bluetooth_data_update(
     """Convert a sensor update to a Bluetooth data update."""
     entity_names: dict[PassiveBluetoothEntityKey, str | None] = {}
     for key, desc in SENSOR_DESCRIPTIONS.items():
-        # PassiveBluetoothDataUpdate does not support DEVICE_CLASS_NAME
-        # the assert satisfies the type checker and will catch attempts
-        # to use DEVICE_CLASS_NAME in the entity descriptions.
+        # PassiveBluetoothDataUpdate does not support DEVICE_CLASS_NAME or UNDEFINED.
+        # The asserts satisfy the type checker and will catch attempts
+        # to use DEVICE_CLASS_NAME or UNDEFINED in the entity descriptions.
         assert desc.name is not DEVICE_CLASS_NAME
+        assert desc.name is not UNDEFINED
         entity_names[_device_key_to_bluetooth_entity_key(adv.device, key)] = desc.name
     return PassiveBluetoothDataUpdate(
         devices={adv.device.address: _sensor_device_info_to_hass(adv)},

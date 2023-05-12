@@ -31,6 +31,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DEVICE_CLASS_NAME, DeviceClassName, DeviceInfo
+from homeassistant.helpers.typing import UNDEFINED, UndefinedType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MODULES
@@ -279,17 +280,18 @@ class SystemBridgeEntity(CoordinatorEntity[SystemBridgeDataUpdateCoordinator]):
         coordinator: SystemBridgeDataUpdateCoordinator,
         api_port: int,
         key: str,
-        name: str | DeviceClassName | None,
+        name: str | DeviceClassName | UndefinedType | None,
     ) -> None:
         """Initialize the System Bridge entity."""
         super().__init__(coordinator)
 
         self._hostname = coordinator.data.system.hostname
         self._key = f"{self._hostname}_{key}"
-        # It's not possible to do string manipulations on DEVICE_CLASS_NAME
-        # the assert satisfies the type checker and will catch attempts
-        # to use DEVICE_CLASS_NAME as name.
+        # It's not possible to do string manipulations on DEVICE_CLASS_NAME or
+        # UNDEFINED. The asserts satisfy the type checker and will catch attempts
+        # to use DEVICE_CLASS_NAME or UNDEFINED as name.
         assert name is not DEVICE_CLASS_NAME
+        assert name is not UNDEFINED
         self._name = f"{self._hostname} {name}"
         self._configuration_url = (
             f"http://{self._hostname}:{api_port}/app/settings.html"
