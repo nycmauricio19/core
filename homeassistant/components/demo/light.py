@@ -90,6 +90,14 @@ async def async_setup_platform(
                 supported_color_modes=SUPPORT_DEMO_HS_WHITE,
                 unique_id="light_6",
             ),
+            DemoLight(
+                available=True,
+                name="Bathroom CT Lights",
+                ct=LIGHT_TEMPS[1],
+                state=True,
+                supported_color_modes={ColorMode.COLOR_TEMP},
+                unique_id="light_7",
+            ),
         ]
     )
 
