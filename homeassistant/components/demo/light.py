@@ -98,6 +98,13 @@ async def async_setup_platform(
                 supported_color_modes={ColorMode.COLOR_TEMP},
                 unique_id="light_7",
             ),
+            DemoLight(
+                available=True,
+                name="Garage Brightness Lights",
+                state=True,
+                supported_color_modes={ColorMode.BRIGHTNESS},
+                unique_id="light_8",
+            ),
         ]
     )
 
