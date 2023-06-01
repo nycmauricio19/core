@@ -1,10 +1,11 @@
 """Support for IPP sensors."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_LOCATION, PERCENTAGE
 from homeassistant.core import HomeAssistant
@@ -25,6 +26,31 @@ from .const import (
 )
 from .coordinator import IPPDataUpdateCoordinator
 from .entity import IPPEntity
+
+
+@dataclass
+class IPPSensorEntityDescriptionMixin:
+    """Mixin for required keys."""
+    value_fn: Callable[[IPPPrinter], str | None]
+
+
+@dataclass
+class IPPSensorEntityDescription(
+    SensorEntityDescription, IPPSensorEntityDescriptionMixin
+):
+    """Describes IPP sensor entity."""
+
+
+SENSORS: tuple[IPPSensorEntityDescription, ...] = (
+    IPPSensorEntityDescription(
+        key="printer",
+        translation_key="printer"
+        icon="mdi:printer",
+        device_class=SensorDeviceClass.ENUM,
+        options = ["idle", "printing", "stopped"],
+        value_fn=lambda printer: printer.state.printer_state,
+    ),
+)
 
 
 async def async_setup_entry(
@@ -55,33 +81,30 @@ async def async_setup_entry(
 class IPPSensor(IPPEntity, SensorEntity):
     """Defines an IPP sensor."""
 
+    entity_description: IPPSensorEntityDescription
+
     def __init__(
         self,
         *,
         coordinator: IPPDataUpdateCoordinator,
-        enabled_default: bool = True,
+        description: IPPSensorEntityDescription,
         entry_id: str,
         unique_id: str,
-        icon: str,
-        key: str,
-        name: str,
-        unit_of_measurement: str | None = None,
-        translation_key: str | None = None,
     ) -> None:
         """Initialize IPP sensor."""
-        self._key = key
-        self._attr_unique_id = f"{unique_id}_{key}"
-        self._attr_native_unit_of_measurement = unit_of_measurement
-        self._attr_translation_key = translation_key
-
         super().__init__(
             entry_id=entry_id,
             device_id=unique_id,
             coordinator=coordinator,
-            name=name,
-            icon=icon,
-            enabled_default=enabled_default,
         )
+
+        self.entity_description = description
+        self._attr_unique_id = f"{unique_id}_{description.key}"
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the state of the sensor."""
+        return self.entity_description.value_fn(self.coordinator.data)
 
 
 class IPPMarkerSensor(IPPSensor):
