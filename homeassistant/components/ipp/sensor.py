@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -38,7 +38,7 @@ from .entity import IPPEntity
 class IPPSensorEntityDescriptionMixin:
     """Mixin for required keys."""
 
-    value_fn: Callable[[Any], StateType]
+    value_fn: Callable[[Any], StateType | datetime]
 
 
 @dataclass
@@ -114,15 +114,15 @@ async def async_setup_entry(
         ]
     )
 
-    for marker_index in enumerate(coordinator.data.markers):
+    for index, marker in enumerate(coordinator.data.markers):
         sensors.append(
             IPPMarkerSensor(
-                marker_index,
+                index,
                 unique_id,
                 coordinator,
                 IPPSensorEntityDescription(
-                    key=f"marker_{marker_index}",
-                    name=coordinator.data.markers[marker_index].name,
+                    key=f"marker_{index}",
+                    name=marker.name,
                     icon="mdi:water",
                     native_unit_of_measurement=PERCENTAGE,
                     attributes_fn=lambda marker: {
