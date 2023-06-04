@@ -170,7 +170,7 @@ class IPPSensor(IPPEntity, SensorEntity):
         return self.entity_description.attributes_fn(self.coordinator.data)
 
     @property
-    def native_value(self) -> StateType:
+    def native_value(self) -> StateType | datetime:
         """Return the state of the sensor."""
         return self.entity_description.value_fn(self.coordinator.data)
 
@@ -211,7 +211,7 @@ class IPPMarkerSensor(IPPEntity, SensorEntity):
         )
 
     @property
-    def native_value(self) -> StateType:
+    def native_value(self) -> StateType | datetime:
         """Return the state of the sensor."""
         return self.entity_description.value_fn(
             self.coordinator.data.markers[self.marker_index]
