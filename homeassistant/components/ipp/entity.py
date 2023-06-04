@@ -13,16 +13,13 @@ class IPPEntity(CoordinatorEntity[IPPDataUpdateCoordinator]):
 
     def __init__(
         self,
-        *,
-        entry_id: str,
         device_id: str,
         coordinator: IPPDataUpdateCoordinator,
     ) -> None:
         """Initialize the IPP entity."""
         super().__init__(coordinator)
         self._device_id = device_id
-        self._entry_id = entry_id
-        
+
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._device_id)},
             manufacturer=self.coordinator.data.info.manufacturer,
