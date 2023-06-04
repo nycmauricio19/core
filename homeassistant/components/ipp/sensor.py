@@ -124,7 +124,7 @@ async def async_setup_entry(
                     key=f"marker_{marker_index}",
                     name=coordinator.data.markers[marker_index].name,
                     icon="mdi:water",
-                    unit_of_measurement=PERCENTAGE,
+                    native_unit_of_measurement=PERCENTAGE,
                     attributes_fn=lambda marker: {
                         ATTR_MARKER_HIGH_LEVEL: marker.high_level,
                         ATTR_MARKER_LOW_LEVEL: marker.low_level,
